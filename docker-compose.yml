@@ -1,0 +1,36 @@
+services:
+  mysql:
+    container_name: mysql-db-wca
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_DATABASE: bookNetwork
+      MYSQL_USER: Ahmed
+      MYSQL_PASSWORD: Ahmed@000
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    networks:
+      - whatsapp-clone
+    restart: unless-stopped
+  keycloak:
+    container_name: keycloak-wac
+    image: quay.io/keycloak/keycloak:26.0.0
+    ports:
+      - "9090:8080"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    networks:
+      - whatsapp-clone
+    command:
+      - "start-dev"
+
+networks:
+  whatsapp-clone:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
