@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class KeycloakJwtAuthenticationConveter implements Converter<Jwt, AbstractAuthenticationToken> {
+public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
     @Override
     public AbstractAuthenticationToken convert(@NonNull Jwt source) {
 

@@ -7,6 +7,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -43,7 +45,7 @@ public class SecurityConfig {
                         )
                 .oauth2ResourceServer(auth ->
                         auth.jwt( token ->
-                                token.jwtAuthenticationConverter(new KeycloakJwtAuthenticationConveter())));
+                                token.jwtAuthenticationConverter(new KeycloakJwtAuthenticationConverter())));
 
 
         return http.build();
@@ -74,5 +76,10 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
 
         return new CorsFilter(source);
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        return NimbusJwtDecoder.withJwkSetUri("http://localhost:9090/realms/whatsapp-clone").build();
     }
 }
