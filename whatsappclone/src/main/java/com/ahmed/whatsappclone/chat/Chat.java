@@ -2,18 +2,15 @@ package com.ahmed.whatsappclone.chat;
 
 import com.ahmed.whatsappclone.common.BaseAuditingEntity;
 import com.ahmed.whatsappclone.message.Message;
-import com.ahmed.whatsappclone.message.MessageState;
-import com.ahmed.whatsappclone.message.MessageType;
 import com.ahmed.whatsappclone.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.ahmed.whatsappclone.chat.ChatConstants.FIND_CHAT_BY_SENDER_ID;
+import static com.ahmed.whatsappclone.chat.ChatConstants.FIND_CHAT_BY_SENDER_ID_AND_RECEIVER;
 import static com.ahmed.whatsappclone.message.MessageState.SENT;
 import static com.ahmed.whatsappclone.message.MessageType.TEXT;
 import static jakarta.persistence.FetchType.EAGER;
@@ -25,6 +22,10 @@ import static jakarta.persistence.GenerationType.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "chat")
+@NamedQuery(name = FIND_CHAT_BY_SENDER_ID,
+            query = "SELECT DISTINCT c FROM Chat c WHERE c.sender.id = :senderId OR c.recipient.id = :senderId ORDER BY createdDate DESC")
+@NamedQuery(name = FIND_CHAT_BY_SENDER_ID_AND_RECEIVER,
+            query = "SELECT DISTINCT c FROM Chat c WHERE (c.sender.id = :senderId AND c.recipient.id = :recipientId) OR (c.sender.id = :recipientId AND c.recipient.id = :senderId) ORDER BY createdDate DESC")
 public class Chat extends BaseAuditingEntity {
 
     @Id
@@ -46,7 +47,7 @@ public class Chat extends BaseAuditingEntity {
 //
 //    /*
 //    Case: if we have 2 chats Ahmed and Hazem
-//    if the SenderId(Ahmed) then i must be chatting with Hazem, so the chatName would be Hazem and vice Versa 
+//    if the SenderId(Ahmed) then i must be chatting with Hazem, so the chatName would be Hazem and vice Versa
 //     */
     @Transient
     public String getChatName(final String senderId){
@@ -64,7 +65,7 @@ public class Chat extends BaseAuditingEntity {
                 .filter(m -> SENT == m.getState())
                 .count();
     }
-//
+
     @Transient
     public String getLastMessage() {
         if(messages != null && !messages.isEmpty()){
