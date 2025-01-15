@@ -46,7 +46,7 @@ public class Chat extends BaseAuditingEntity {
 //
 //    /*
 //    Case: if we have 2 chats Ahmed and Hazem
-//    if the SenderId(Ahmed) then i must be chatting with Hazem, so the chatName would be Hazem and vice Versa
+//    if the SenderId(Ahmed) then i must be chatting with Hazem, so the chatName would be Hazem and vice Versa 
 //     */
     @Transient
     public String getChatName(final String senderId){
