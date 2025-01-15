@@ -18,5 +18,3 @@ server:
   servlet:
     context-path: /api/v1/
 
-
-#    Testing the github repo if it will read all files everywhere or not

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/bookNetwork
+    url: jdbc:mysql://localhost:3306/whatsapp_clone
     username: Ahmed
     password: Ahmed@000
     driver-class-name: com.mysql.cj.jdbc.Driver
