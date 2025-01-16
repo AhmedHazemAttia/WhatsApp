@@ -16,8 +16,8 @@ spring:
 
 
 
-flyway:
-  enabled: false
+#flyway:
+#  enabled: false
 
   security:
     oauth2:
