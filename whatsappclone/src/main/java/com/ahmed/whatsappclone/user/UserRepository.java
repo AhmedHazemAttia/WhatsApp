@@ -7,9 +7,13 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 import static com.ahmed.whatsappclone.user.UserConstants.FIND_USER_BY_EMAIL;
+import static com.ahmed.whatsappclone.user.UserConstants.FIND_USER_BY_PUBLIC_ID;
 
 public interface UserRepository extends JpaRepository<User, String> {
 
     @Query(name = FIND_USER_BY_EMAIL)
     Optional<User> findByEmail(@Param("email") String userEmail);
+
+    @Query(name = FIND_USER_BY_PUBLIC_ID)
+    Optional<User> findByPublicId(String publicId);
 }
