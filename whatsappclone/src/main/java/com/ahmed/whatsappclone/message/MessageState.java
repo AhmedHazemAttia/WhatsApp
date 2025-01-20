@@ -1,8 +1,7 @@
-package com.ahmed.whatsappclone.message;
+    package com.ahmed.whatsappclone.message;
 
 
-
-public enum MessageState {
-    SENT,
-    SEEN
-}
+    public enum MessageState {
+        SENT,
+        SEEN
+    }
