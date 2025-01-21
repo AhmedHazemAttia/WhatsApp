@@ -19,7 +19,5 @@ public class UserService {
                 .stream()
                 .map(userMapper::toUserResponse)
                 .toList();
-
-
     }
 }
