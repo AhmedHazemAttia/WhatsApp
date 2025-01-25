@@ -49,7 +49,7 @@
         <div class="d-flex flex-column align-items-end">
           <span class="msg-date"
           [class.unread]="chat.unreadCount && chat.unreadCount > 0">
-            {{ chat.lastMessageTime | date:'DD.MM.YYYY HH:MM' }}
+            {{ chat.lastMessageTime | date:'dd/mm/yyyy HH:MM' }}
           </span>
           @if (chat.unreadCount && chat.unreadCount > 0) {
             <small class="unread-msg-badge" >{{ chat.unreadCount }}</small>
@@ -70,7 +70,7 @@
             @if (contact.online) {
               <small class="text-secondary">Online</small>
             } @else {
-              <small class="text-secondary">Last seen&nbsp;{{ contact.lastSeen | date: 'DD.MM.YYYY HH:MM' }}</small>
+              <small class="text-secondary">Last seen&nbsp;{{ contact.lastSeen | date: 'dd/mm/yyyy HH:MM' }}</small>
             }
           </div>
 
