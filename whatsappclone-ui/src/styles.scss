@@ -4,3 +4,31 @@
 @import "@fortawesome/fontawesome-free/css/all.min.css";
 //todo add  the emoji Styles
 
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+ background-color: #cccccc;
+}
+
+.gray-bg {
+  background-color: #f0f2f5;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.user-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  >img {
+    width: 100%;
+  }
+}
