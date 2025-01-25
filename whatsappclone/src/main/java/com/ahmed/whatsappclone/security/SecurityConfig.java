@@ -78,8 +78,8 @@ public class SecurityConfig {
         return new CorsFilter(source);
     }
 
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withJwkSetUri("http://localhost:9090/realms/whatsapp-clone").build();
-    }
+//    @Bean
+//    public JwtDecoder jwtDecoder() {
+//        return NimbusJwtDecoder.withJwkSetUri("http://localhost:9090/realms/whatsapp-clone").build();
+//    }
 }
