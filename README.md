@@ -72,8 +72,5 @@ After accessing the frontend application in your browser, you will likely be red
 
 ## Troubleshooting
 
-If you encounter any issues during the setup or running of the project, please consult the project documentation or contact the development team.
+If you encounter any issues during the setup or running of the project, please consult me through my Linkedin: www.linkedin.com/in/ahmed-hazem-08417916b .
 
-## Further Information
-
-For more detailed information about the project, please refer to the project's main README or other relevant documentation.
