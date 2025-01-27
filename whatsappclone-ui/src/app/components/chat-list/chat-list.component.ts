@@ -51,6 +51,25 @@ export class ChatListComponent {
   }
 
   selectContact(contact: UserResponse) {
+
+    if (!contact) {
+      console.error('Contact is null or undefined.');
+      return;
+    }
+
+    // Check if the chat already exists
+    const chatExists = this.chats().some(
+      (chat: ChatResponse):boolean =>
+        chat.senderId === this.keycloakService.userId &&
+        chat.receiverId === contact.id
+    );
+
+    if (chatExists) {
+      console.log('Chat with this contact already exists. No action taken.');
+      return;
+    }
+
+
     this.chatService.createChat({
       'sender_id': this.keycloakService.userId as string,
       'receiver_id': contact.id as string
