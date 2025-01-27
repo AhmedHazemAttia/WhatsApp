@@ -93,7 +93,7 @@
                 type="file"
                 [hidden]="true"
                 accept=".jpg, .jpeg, .png, .svg, .mp4, .mov, .mp3"
-                (change)="uploadMediaFile($event.target)"
+                (change)="uploadMedia($event.target)"
               >
               <i class="fa-regular fa-face-smile cursor-pointer" (click)="showEmojis = !showEmojis"></i>
               @if (showEmojis) {

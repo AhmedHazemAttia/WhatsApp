@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ChatListComponent} from '../../components/chat-list/chat-list.component';
 import {ChatResponse} from '../../services/models/chat-response';
 import {ChatService} from '../../services/services/chat.service';
@@ -24,20 +24,27 @@ import {Notification} from './notification';
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss'
 })
-export class MainComponent implements OnInit, OnDestroy{
+export class MainComponent implements OnInit, OnDestroy,AfterViewChecked {
 
-  chats: Array<ChatResponse> =[];
-  selectedChat: ChatResponse = {}
-  chatMessages: MessageResponse[] = []
-  showEmojis: boolean = false;
+  selectedChat: ChatResponse = {};
+  chats: Array<ChatResponse> = [];
+  chatMessages: Array<MessageResponse> = [];
+  socketClient: any = null;
   messageContent: string = '';
-  socketClient:any = null;
+  showEmojis = false;
+  @ViewChild('scrollableDiv') scrollableDiv!: ElementRef<HTMLDivElement>;
   private notificationSubscription: any;
+
   constructor(
     private chatService: ChatService,
+    private messageService: MessageService,
     private keycloakService: KeycloakService,
-    private messageService: MessageService
-  ) {}
+  ) {
+  }
+
+  ngAfterViewChecked(): void {
+    this.scrollToBottom();
+  }
 
   ngOnDestroy(): void {
     if (this.socketClient !== null) {
@@ -48,28 +55,8 @@ export class MainComponent implements OnInit, OnDestroy{
   }
 
   ngOnInit(): void {
-    this.getAllChats()
-    this.initWebSocket()
-    }
-
-
-  private getAllChats(){
-    this.chatService.getChatsByReceiver()
-      .subscribe({
-        next: (res) => {
-          this.chats = res;
-        }
-      })
-  }
-
-
-  userProfile() {
-    this.keycloakService.accountManagement()
-  }
-
-  logout() {
-    this.keycloakService.logout()
-
+    this.initWebSocket();
+    this.getAllChats();
   }
 
   chatSelected(chatResponse: ChatResponse) {
@@ -77,7 +64,115 @@ export class MainComponent implements OnInit, OnDestroy{
     this.getAllChatMessages(chatResponse.id as string);
     this.setMessagesToSeen();
     this.selectedChat.unreadCount = 0;
+  }
 
+  isSelfMessage(message: MessageResponse): boolean {
+    return message.senderId === this.keycloakService.userId;
+  }
+
+  sendMessage() {
+    if (this.messageContent) {
+      const messageRequest: MessageRequest = {
+        chatId: this.selectedChat.id,
+        senderId: this.getSenderId(),
+        receiverId: this.getReceiverId(),
+        content: this.messageContent,
+        type: 'TEXT',
+      };
+      this.messageService.saveMessage({
+        body: messageRequest
+      }).subscribe({
+        next: () => {
+          const message: MessageResponse = {
+            senderId: this.getSenderId(),
+            receiverId: this.getReceiverId(),
+            content: this.messageContent,
+            type: 'TEXT',
+            state: 'SENT',
+            createdAt: new Date().toString()
+          };
+          this.selectedChat.lastMessage = this.messageContent;
+          this.chatMessages.push(message);
+          this.messageContent = '';
+          this.showEmojis = false;
+        }
+      });
+    }
+  }
+
+  keyDown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.sendMessage();
+    }
+  }
+
+  onSelectEmojis(emojiSelected: any) {
+    const emoji: EmojiData = emojiSelected.emoji;
+    this.messageContent += emoji.native;
+  }
+
+  onClick() {
+    this.setMessagesToSeen();
+  }
+
+  uploadMedia(target: EventTarget | null) {
+    const file = this.extractFileFromTarget(target);
+    if (file !== null) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.result) {
+
+          const mediaLines = reader.result.toString().split(',')[1];
+
+          this.messageService.uploadMedia({
+            'chat-id': this.selectedChat.id as string,
+            body: {
+              file: file
+            }
+          }).subscribe({
+            next: () => {
+              const message: MessageResponse = {
+                senderId: this.getSenderId(),
+                receiverId: this.getReceiverId(),
+                content: 'Attachment',
+                type: 'IMAGE',
+                state: 'SENT',
+                media: [mediaLines],
+                createdAt: new Date().toString()
+              };
+              this.chatMessages.push(message);
+            }
+          });
+        }
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+
+  logout() {
+    this.keycloakService.logout();
+  }
+
+  userProfile() {
+    this.keycloakService.accountManagement();
+  }
+
+  private setMessagesToSeen() {
+    this.messageService.setMessagesToSeen({
+      'chat-id': this.selectedChat.id as string
+    }).subscribe({
+      next: () => {
+      }
+    });
+  }
+
+  private getAllChats() {
+    this.chatService.getChatsByReceiver()
+      .subscribe({
+        next: (res) => {
+          this.chats = res;
+        }
+      });
   }
 
   private getAllChatMessages(chatId: string) {
@@ -87,86 +182,8 @@ export class MainComponent implements OnInit, OnDestroy{
       next: (messages) => {
         this.chatMessages = messages;
       }
-    })
+    });
   }
-
-  private setMessagesToSeen() {
-    this.messageService.setMessagesToSeen({
-      'chat-id': this.selectedChat.id as string
-    }).subscribe({
-      next: () => {}
-    })
-
-  }
-
-  isSelfMessage(message: MessageResponse):boolean {
-    return message.senderId === this.keycloakService.userId;
-  }
-
-  uploadMediaFile(target: EventTarget | null) {
-
-  }
-
-  onSelectEmojis(emojiSelected: any) {
-    const emoji: EmojiData = emojiSelected.emoji;
-    this.messageContent += emoji.native;
-
-  }
-
-  keyDown(event: KeyboardEvent) {
-    if(event.key === 'Enter'){
-      this.sendMessage();
-    }
-  }
-
-  onClick() {
-    this.setMessagesToSeen()
-  }
-
-  sendMessage() {
-    if (this.messageContent){
-      const messageRequest: MessageRequest = {
-        chatId: this.selectedChat.id,
-        senderId: this.getSenderId(),
-        receiverId: this.getReceiverId(),
-        content: this.messageContent,
-        type: 'TEXT'
-      };
-      this.messageService.saveMessage({ body: messageRequest})
-        .subscribe({
-          next: () => {
-            const message: MessageResponse = {
-              senderId: this.getSenderId(),
-              receiverId: this.getReceiverId(),
-              content: this.messageContent,
-              type: 'TEXT',
-              state: 'SENT',
-              createdAt: new Date().toString()
-            };
-            this.selectedChat.lastMessage = this.messageContent;
-            this.chatMessages.push(message)
-            this.messageContent = ''
-            this.showEmojis = false
-          }
-        })
-    }
-
-  }
-
-  private getSenderId():string {
-    if(this.selectedChat.senderId === this.keycloakService.userId) {
-      return this.selectedChat.senderId as string;
-    }
-    return this.selectedChat.receiverId as string
-  }
-
-  private getReceiverId():string {
-    if(this.selectedChat.senderId === this.keycloakService.userId) {
-      return this.selectedChat.receiverId as string;
-    }
-    return this.selectedChat.senderId as string
-  }
-
 
   private initWebSocket() {
     if (this.keycloakService.keycloak.tokenParsed?.sub) {
@@ -238,4 +255,32 @@ export class MainComponent implements OnInit, OnDestroy{
     }
   }
 
+  private getSenderId(): string {
+    if (this.selectedChat.senderId === this.keycloakService.userId) {
+      return this.selectedChat.senderId as string;
+    }
+    return this.selectedChat.receiverId as string;
+  }
+
+  private getReceiverId(): string {
+    if (this.selectedChat.senderId === this.keycloakService.userId) {
+      return this.selectedChat.receiverId as string;
+    }
+    return this.selectedChat.senderId as string;
+  }
+
+  private scrollToBottom() {
+    if (this.scrollableDiv) {
+      const div = this.scrollableDiv.nativeElement;
+      div.scrollTop = div.scrollHeight;
+    }
+  }
+
+  private extractFileFromTarget(target: EventTarget | null): File | null {
+    const htmlInputTarget = target as HTMLInputElement;
+    if (target === null || htmlInputTarget.files === null) {
+      return null;
+    }
+    return htmlInputTarget.files[0];
+  }
 }
